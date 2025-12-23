@@ -226,7 +226,69 @@ flutter build macos --release
 | Windows | ✅ Supported |
 | Linux | ✅ Supported |
 
-## 🎨 Theming
+## � Bilingual Support (English/French)
+
+The app is fully bilingual, reflecting Canada's official languages:
+
+### Language Features
+- **UI Translation**: All screens, buttons, and labels support English and French
+- **Question Content**: Questions, options, and explanations available in both languages
+- **Study Guide**: Complete study materials in both languages
+- **Real-time Switching**: Change language instantly in Settings
+
+### Screens with French Support
+- ✅ Dashboard (Home)
+- ✅ Practice Configuration
+- ✅ Test Session
+- ✅ Results & Review
+- ✅ Study Guide
+- ✅ Settings
+
+### How to Switch Language
+1. Go to **Settings** (gear icon in navigation)
+2. Tap on **Language**
+3. Select **English (🇬🇧)** or **Français (🇫🇷)**
+4. The entire app updates immediately
+
+## 📚 Study Guide Content
+
+The Study Guide covers all topics from the official "Discover Canada" guide:
+
+### Rights & Responsibilities
+- Fundamental rights under the Charter
+- Citizen responsibilities and duties
+- Voting rights and obligations
+
+### Canadian History
+- Aboriginal Peoples (First Nations, Inuit, Métis)
+- Confederation (1867)
+- World Wars and Canada's contributions
+- Key historical figures
+
+### Government
+- Constitutional Monarchy structure
+- Three levels of government (Federal, Provincial, Municipal)
+- Electoral process and voting
+- Parliament (Senate and House of Commons)
+
+### Geography
+- 10 Provinces and 3 Territories
+- Five main regions of Canada
+- Capital cities
+- Natural features and resources
+
+### Symbols & Economy
+- National symbols (Flag, Anthem, Beaver, Maple Leaf)
+- Major industries
+- Trading partners
+- Economic organizations (G7, G20, USMCA)
+
+### Test-Taking Tips
+- Time management strategies
+- Passing score requirements (75%)
+- Study recommendations
+
+## �🎨 Theming
 
 The app features a Canadian-themed design with:
 - Primary color: Canadian Red (#FF0000)

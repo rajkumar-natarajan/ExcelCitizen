@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/gamification_controller.dart';
+import '../controllers/settings_controller.dart';
+import '../models/question.dart';
 import '../widgets/canadian_theme.dart';
 import 'achievements_screen.dart';
 
@@ -14,18 +16,23 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final GamificationController _gamification = GamificationController();
+  final SettingsController _settings = SettingsController();
 
   @override
   void initState() {
     super.initState();
     _gamification.addListener(_refresh);
+    _settings.addListener(_refresh);
   }
 
   @override
   void dispose() {
     _gamification.removeListener(_refresh);
+    _settings.removeListener(_refresh);
     super.dispose();
   }
+
+  bool get _isFrench => _settings.language == Language.french;
 
   void _refresh() => setState(() {});
 
@@ -70,7 +77,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _buildWelcomeCard(context),
             const SizedBox(height: 24),
             Text(
-              'Quick Actions',
+              _isFrench ? 'Actions rapides' : 'Quick Actions',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -79,7 +86,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _buildQuickActionGrid(context),
             const SizedBox(height: 24),
             Text(
-              'Daily Challenges',
+              _isFrench ? 'Défis quotidiens' : 'Daily Challenges',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -371,7 +378,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Welcome back!',
+                  _isFrench ? 'Bienvenue!' : 'Welcome back!',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -380,9 +387,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Ready to ace your Citizenship? Start your daily practice now.',
-              style: TextStyle(
+            Text(
+              _isFrench 
+                  ? 'Prêt à réussir votre examen de citoyenneté? Commencez votre pratique quotidienne.'
+                  : 'Ready to ace your Citizenship? Start your daily practice now.',
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
                 height: 1.4,
@@ -392,7 +401,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             FilledButton.icon(
               onPressed: () => widget.onNavigate(1), // Navigate to Practice tab
               icon: const Icon(Icons.play_arrow_rounded),
-              label: const Text('Start Daily Practice'),
+              label: Text(_isFrench ? 'Commencer la pratique' : 'Start Daily Practice'),
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: const Color(0xFFC8102E),
@@ -417,36 +426,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         _buildActionCard(
           context,
-          'Verbal',
-          Icons.chat_bubble_outline,
+          _isFrench ? 'Histoire' : 'History',
+          Icons.history_edu,
           Colors.blue,
           () => widget.onNavigate(1),
         ),
         _buildActionCard(
           context,
-          'Quantitative',
-          Icons.calculate_outlined,
+          _isFrench ? 'Gouvernement' : 'Government',
+          Icons.account_balance,
           Colors.green,
           () => widget.onNavigate(1),
         ),
         _buildActionCard(
           context,
-          'Non-Verbal',
-          Icons.grid_view,
+          _isFrench ? 'Droits' : 'Rights',
+          Icons.gavel,
           Colors.orange,
           () => widget.onNavigate(1),
         ),
         _buildActionCard(
           context,
-          'Achievements',
-          Icons.emoji_events,
+          _isFrench ? 'Géographie' : 'Geography',
+          Icons.map,
           Colors.purple,
-          () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const AchievementsScreen()),
-            );
-          },
+          () => widget.onNavigate(1),
         ),
       ],
     );

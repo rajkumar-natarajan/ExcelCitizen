@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/question.dart';
+import '../controllers/settings_controller.dart';
 
 class ReviewScreen extends StatelessWidget {
   final List<Question> questions;
@@ -13,11 +14,17 @@ class ReviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Review Answers'),
-      ),
-      body: ListView.builder(
+    return AnimatedBuilder(
+      animation: SettingsController(),
+      builder: (context, child) {
+        final language = SettingsController().language;
+        final isFrench = language == Language.french;
+        
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(isFrench ? 'Révision des réponses' : 'Review Answers'),
+          ),
+          body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: questions.length,
         itemBuilder: (context, index) {
@@ -76,7 +83,7 @@ class ReviewScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    question.getStem(Language.english), // Default to English for now, should pass language
+                    question.getStem(language),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -154,7 +161,7 @@ class ReviewScreen extends StatelessWidget {
                           ],
                           Expanded(
                             child: Text(
-                              question.getOptions(Language.english)[optIndex],
+                              question.getOptions(language)[optIndex],
                               style: TextStyle(
                                 color: isCorrect || (isSelected && !isCorrect)
                                     ? Colors.black
@@ -190,7 +197,7 @@ class ReviewScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Explanation',
+                                isFrench ? 'Explication' : 'Explanation',
                                 style: TextStyle(
                                   color: Colors.blue.shade700,
                                   fontWeight: FontWeight.bold,
@@ -200,7 +207,7 @@ class ReviewScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            question.getExplanation(Language.english),
+                            question.getExplanation(language),
                             style: TextStyle(
                               color: Colors.blue.shade900,
                               fontSize: 14,
@@ -216,6 +223,8 @@ class ReviewScreen extends StatelessWidget {
           );
         },
       ),
+    );
+      },
     );
   }
 }
