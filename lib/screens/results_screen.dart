@@ -172,7 +172,7 @@ class ResultsScreen extends StatelessWidget {
         ),
         Text(
           label,
-          style: TextStyle(color: color.withAlpha(180)),
+          style: TextStyle(color: color.withValues(alpha: 0.7)),
         ),
       ],
     );
@@ -181,6 +181,7 @@ class ResultsScreen extends StatelessWidget {
   Widget _buildScoreCard(BuildContext context) {
     final percentage = result.percentage;
     final color = _getScoreColor(percentage);
+    final passed = percentage >= 75; // Canadian citizenship test passing score
 
     return Card(
       child: Padding(
@@ -196,7 +197,7 @@ class ResultsScreen extends StatelessWidget {
                   child: CircularProgressIndicator(
                     value: percentage / 100,
                     strokeWidth: 12,
-                    backgroundColor: color.withOpacity(0.1),
+                    backgroundColor: color.withValues(alpha: 0.1),
                     color: color,
                   ),
                 ),
@@ -210,8 +211,11 @@ class ResultsScreen extends StatelessWidget {
                           ),
                     ),
                     Text(
-                      'Score',
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      passed ? 'PASSED! 🍁' : 'Keep Practicing',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: passed ? Colors.green : Colors.orange,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -235,8 +239,8 @@ class ResultsScreen extends StatelessWidget {
                 ),
                 _buildStatItem(
                   context,
-                  'Percentile',
-                  '${result.percentile}th',
+                  'Passing',
+                  '75%',
                   Colors.purple,
                 ),
               ],
@@ -275,19 +279,6 @@ class ResultsScreen extends StatelessWidget {
       children: result.scoreByType.entries.map((entry) {
         final type = entry.key;
         final score = entry.value;
-        // Calculate total questions for this type from answers
-        final total = result.answers.where((a) {
-          // This is a bit inefficient, but works for now. 
-          // Ideally we'd pass the questions list or store type in answer
-          // For now, let's just assume we can get it from the score map logic
-          // Actually, we can't easily get total per type from just scoreByType map
-          // Let's iterate answers and count
-          return true; // Placeholder
-        }).length; 
-        
-        // Better approach: Count totals from answers by looking up question type?
-        // Since we don't have questions list here easily without passing it,
-        // let's just show the raw score for now.
         
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
@@ -306,17 +297,23 @@ class ResultsScreen extends StatelessWidget {
 
   IconData _getIconForType(QuestionType type) {
     switch (type) {
-      case QuestionType.verbal:
-        return Icons.chat_bubble_outline;
-      case QuestionType.quantitative:
-        return Icons.calculate_outlined;
-      case QuestionType.nonVerbal:
-        return Icons.grid_view;
+      case QuestionType.rightsResponsibilities:
+        return Icons.balance;
+      case QuestionType.history:
+        return Icons.history_edu;
+      case QuestionType.government:
+        return Icons.account_balance;
+      case QuestionType.geography:
+        return Icons.map;
+      case QuestionType.symbols:
+        return Icons.flag;
+      case QuestionType.economy:
+        return Icons.trending_up;
     }
   }
 
   Color _getScoreColor(double percentage) {
-    if (percentage >= 80) return Colors.green;
+    if (percentage >= 75) return Colors.green;
     if (percentage >= 60) return Colors.orange;
     return Colors.red;
   }

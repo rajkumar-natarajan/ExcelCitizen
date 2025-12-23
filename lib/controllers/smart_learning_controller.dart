@@ -129,6 +129,8 @@ class SmartLearningController extends ChangeNotifier {
   Set<String> get bookmarkedQuestionIds => Set.from(_bookmarkedQuestions);
   
   int get bookmarkCount => _bookmarkedQuestions.length;
+  
+  int get masteredCount => _masteredQuestions.length;
 
   // ==================== PERFORMANCE TRACKING ====================
 
@@ -187,7 +189,7 @@ class SmartLearningController extends ChangeNotifier {
       totalQuestions: questions.length,
       correctAnswers: correct,
       totalTimeSeconds: totalTimeSeconds,
-      level: questions.isNotEmpty ? questions.first.level.value : 'unknown',
+      testType: questions.isNotEmpty ? questions.first.type.displayName : 'unknown',
     ));
     
     _save();
@@ -233,16 +235,44 @@ class SmartLearningController extends ChangeNotifier {
 
   List<String> _getSubtypesForType(QuestionType type) {
     switch (type) {
-      case QuestionType.verbal:
-        return [VerbalSubType.analogies.value, VerbalSubType.sentenceCompletion.value, 
-                VerbalSubType.classification.value, VerbalSubType.synonyms.value,
-                VerbalSubType.antonyms.value];
-      case QuestionType.quantitative:
-        return [QuantitativeSubType.numberAnalogies.value, QuantitativeSubType.numberSeries.value,
-                QuantitativeSubType.quantitativeRelations.value];
-      case QuestionType.nonVerbal:
-        return [NonVerbalSubType.figureMatrices.value, NonVerbalSubType.figureClassification.value,
-                NonVerbalSubType.figureSeries.value];
+      case QuestionType.rightsResponsibilities:
+        return [
+          RightsSubType.citizenshipRights.value,
+          RightsSubType.responsibilities.value,
+          RightsSubType.charterOfRights.value,
+          RightsSubType.equality.value,
+        ];
+      case QuestionType.history:
+        return [
+          HistorySubType.aboriginal.value,
+          HistorySubType.exploration.value,
+          HistorySubType.confederation.value,
+          HistorySubType.modernCanada.value,
+          HistorySubType.worldWars.value,
+        ];
+      case QuestionType.government:
+        return [
+          GovernmentSubType.federalGovernment.value,
+          GovernmentSubType.provincialGovernment.value,
+          GovernmentSubType.elections.value,
+          GovernmentSubType.monarchy.value,
+        ];
+      case QuestionType.geography:
+        return [
+          GeographySubType.provinces.value,
+          GeographySubType.capitals.value,
+          GeographySubType.regions.value,
+          GeographySubType.naturalResources.value,
+        ];
+      case QuestionType.symbols:
+        return [
+          SymbolsSubType.nationalSymbols.value,
+          SymbolsSubType.holidays.value,
+          SymbolsSubType.anthem.value,
+          SymbolsSubType.flags.value,
+        ];
+      case QuestionType.economy:
+        return ['economy_general', 'trade', 'industries'];
     }
   }
 
@@ -299,29 +329,6 @@ class SmartLearningController extends ChangeNotifier {
     return ((daysSinceFirst + firstDayOfYear.weekday) / 7).ceil();
   }
 
-  /// Get daily practice count for the last n days
-  List<TrendPoint> getDailyPracticeCount(int days) {
-    final sessions = getSessionsForDays(days);
-    Map<String, int> byDay = {};
-    
-    for (int i = 0; i < days; i++) {
-      final date = DateTime.now().subtract(Duration(days: i));
-      final key = '${date.month}/${date.day}';
-      byDay[key] = 0;
-    }
-    
-    for (final session in sessions) {
-      final key = '${session.date.month}/${session.date.day}';
-      byDay[key] = (byDay[key] ?? 0) + 1;
-    }
-    
-    return byDay.entries
-        .map((e) => TrendPoint(label: e.key, value: e.value.toDouble(), sessionCount: e.value))
-        .toList()
-        .reversed
-        .toList();
-  }
-
   // ==================== WEAK AREA FOCUS ====================
 
   /// Get subtypes sorted by weakness (lowest accuracy first)
@@ -370,74 +377,6 @@ class SmartLearningController extends ChangeNotifier {
 
   /// Get count of questions needing review
   int get reviewCount => getQuestionsForReview().length;
-
-  // ==================== SMART QUESTION SELECTION ====================
-
-  /// Prioritize questions based on smart learning
-  /// - Questions needing review come first
-  /// - Questions from weak areas come second
-  /// - Exclude mastered questions (optional)
-  List<Question> prioritizeQuestions(
-    List<Question> questions, {
-    bool includeReviewQuestions = true,
-    bool focusWeakAreas = true,
-    bool excludeMastered = false,
-  }) {
-    List<Question> result = List.from(questions);
-    
-    // Optionally exclude mastered questions
-    if (excludeMastered) {
-      result = result.where((q) => !_masteredQuestions.contains(q.id)).toList();
-    }
-    
-    // Sort by priority
-    result.sort((a, b) {
-      // Priority 1: Questions needing review
-      if (includeReviewQuestions) {
-        final aReview = needsReview(a.id);
-        final bReview = needsReview(b.id);
-        if (aReview && !bReview) return -1;
-        if (!aReview && bReview) return 1;
-      }
-      
-      // Priority 2: Questions from weak areas
-      if (focusWeakAreas) {
-        final aWeak = isWeakArea(a.subType);
-        final bWeak = isWeakArea(b.subType);
-        if (aWeak && !bWeak) return -1;
-        if (!aWeak && bWeak) return 1;
-      }
-      
-      return 0;
-    });
-    
-    return result;
-  }
-
-  // ==================== SUMMARY ====================
-
-  /// Get a summary of smart learning status
-  SmartLearningSummary getSummary() {
-    return SmartLearningSummary(
-      totalQuestionsAttempted: _performanceBySubType.values
-          .fold(0, (sum, stats) => sum + stats.totalAttempts),
-      weakAreaCount: getWeakSubTypes().length,
-      reviewDueCount: reviewCount,
-      bookmarkCount: bookmarkCount,
-      masteredCount: _masteredQuestions.length,
-      totalTestSessions: _testHistory.length,
-      averageAccuracy: _calculateOverallAccuracy(),
-    );
-  }
-
-  double _calculateOverallAccuracy() {
-    int total = 0, correct = 0;
-    for (final stats in _performanceBySubType.values) {
-      total += stats.totalAttempts;
-      correct += stats.correctAttempts;
-    }
-    return total > 0 ? (correct / total) * 100 : 0;
-  }
 
   /// Clear all smart learning data
   Future<void> clearAllData() async {
@@ -489,41 +428,16 @@ class PerformanceStats {
   );
 }
 
-/// Summary of smart learning status
-class SmartLearningSummary {
-  final int totalQuestionsAttempted;
-  final int weakAreaCount;
-  final int reviewDueCount;
-  final int bookmarkCount;
-  final int masteredCount;
-  final int totalTestSessions;
-  final double averageAccuracy;
-
-  SmartLearningSummary({
-    required this.totalQuestionsAttempted,
-    required this.weakAreaCount,
-    required this.reviewDueCount,
-    required this.bookmarkCount,
-    required this.masteredCount,
-    this.totalTestSessions = 0,
-    this.averageAccuracy = 0,
-  });
-}
-
 /// Time statistics for a question subtype
 class TimeStats {
   final String subType;
   int totalTime; // in seconds
   int questionCount;
-  int? fastestTime;
-  int? slowestTime;
 
   TimeStats({
     required this.subType,
     this.totalTime = 0,
     this.questionCount = 0,
-    this.fastestTime,
-    this.slowestTime,
   });
 
   double get averageTime => questionCount > 0 ? totalTime / questionCount : 0;
@@ -531,24 +445,18 @@ class TimeStats {
   void recordTime(int seconds) {
     totalTime += seconds;
     questionCount++;
-    if (fastestTime == null || seconds < fastestTime!) fastestTime = seconds;
-    if (slowestTime == null || seconds > slowestTime!) slowestTime = seconds;
   }
 
   Map<String, dynamic> toJson() => {
     'subType': subType,
     'totalTime': totalTime,
     'questionCount': questionCount,
-    'fastestTime': fastestTime,
-    'slowestTime': slowestTime,
   };
 
   factory TimeStats.fromJson(Map<String, dynamic> json) => TimeStats(
     subType: json['subType'] ?? '',
     totalTime: json['totalTime'] ?? 0,
     questionCount: json['questionCount'] ?? 0,
-    fastestTime: json['fastestTime'],
-    slowestTime: json['slowestTime'],
   );
 }
 
@@ -558,17 +466,17 @@ class TestSessionRecord {
   final int totalQuestions;
   final int correctAnswers;
   final int totalTimeSeconds;
-  final String level;
+  final String testType;
 
   TestSessionRecord({
     required this.date,
     required this.totalQuestions,
     required this.correctAnswers,
     required this.totalTimeSeconds,
-    required this.level,
+    required this.testType,
   });
 
-  double get accuracy => totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;
+  double get accuracy => totalQuestions > 0 ? correctAnswers / totalQuestions : 0;
   double get averageTimePerQuestion => totalQuestions > 0 ? totalTimeSeconds / totalQuestions : 0;
 
   Map<String, dynamic> toJson() => {
@@ -576,7 +484,7 @@ class TestSessionRecord {
     'totalQuestions': totalQuestions,
     'correctAnswers': correctAnswers,
     'totalTimeSeconds': totalTimeSeconds,
-    'level': level,
+    'testType': testType,
   };
 
   factory TestSessionRecord.fromJson(Map<String, dynamic> json) => TestSessionRecord(
@@ -584,7 +492,7 @@ class TestSessionRecord {
     totalQuestions: json['totalQuestions'] ?? 0,
     correctAnswers: json['correctAnswers'] ?? 0,
     totalTimeSeconds: json['totalTimeSeconds'] ?? 0,
-    level: json['level'] ?? '',
+    testType: json['testType'] ?? '',
   );
 }
 

@@ -55,8 +55,8 @@ class ReviewScreen extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: userAnswer.isCorrect
-                              ? Colors.green.withOpacity(0.1)
-                              : Colors.red.withOpacity(0.1),
+                              ? Colors.green.withValues(alpha: 0.1)
+                              : Colors.red.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -98,17 +98,17 @@ class ReviewScreen extends StatelessWidget {
                     final isCorrect = question.correctAnswer == optIndex;
                     
                     Color? backgroundColor;
-                    Color? borderColor;
+                    Color borderColor;
                     IconData? icon;
                     Color? iconColor;
 
                     if (isCorrect) {
-                      backgroundColor = Colors.green.withOpacity(0.1);
+                      backgroundColor = Colors.green.withValues(alpha: 0.1);
                       borderColor = Colors.green;
                       icon = Icons.check_circle;
                       iconColor = Colors.green;
                     } else if (isSelected && !isCorrect) {
-                      backgroundColor = Colors.red.withOpacity(0.1);
+                      backgroundColor = Colors.red.withValues(alpha: 0.1);
                       borderColor = Colors.red;
                       icon = Icons.cancel;
                       iconColor = Colors.red;
@@ -123,7 +123,7 @@ class ReviewScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: backgroundColor,
                         border: Border.all(
-                          color: borderColor ?? Colors.grey.shade300,
+                          color: borderColor,
                         ),
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -172,10 +172,10 @@ class ReviewScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.05),
+                        color: Colors.blue.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: Colors.blue.withOpacity(0.2),
+                          color: Colors.blue.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Column(

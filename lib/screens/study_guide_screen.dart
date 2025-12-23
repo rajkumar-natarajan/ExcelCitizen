@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/question.dart';
 
 class StudyGuideScreen extends StatelessWidget {
   const StudyGuideScreen({super.key});
@@ -222,7 +221,7 @@ class StudyGuideScreen extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: color),
@@ -263,9 +262,9 @@ class StudyGuideScreen extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.05),
+                    color: color.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: color.withOpacity(0.2)),
+                    border: Border.all(color: color.withValues(alpha: 0.2)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,7 +296,6 @@ class StudyGuideScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: tips.map((tip) {
-            final parts = tip.split('**');
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: RichText(

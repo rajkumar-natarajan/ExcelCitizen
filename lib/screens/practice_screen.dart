@@ -14,16 +14,23 @@ class PracticeScreen extends StatefulWidget {
 }
 
 class _PracticeScreenState extends State<PracticeScreen> {
-  late CitizenshipLevel _selectedLevel;
+  late Difficulty _selectedDifficulty;
   late Language _selectedLanguage;
-  Set<QuestionType> _selectedTypes = {QuestionType.verbal, QuestionType.quantitative, QuestionType.nonVerbal};
+  Set<QuestionType> _selectedTypes = {
+    QuestionType.rightsResponsibilities,
+    QuestionType.history,
+    QuestionType.government,
+    QuestionType.geography,
+    QuestionType.symbols,
+    QuestionType.economy,
+  };
   final SmartLearningController _smartLearning = SmartLearningController();
 
   @override
   void initState() {
     super.initState();
     final settings = SettingsController();
-    _selectedLevel = settings.defaultLevel;
+    _selectedDifficulty = settings.defaultDifficulty;
     _selectedLanguage = settings.language;
   }
 
@@ -40,34 +47,34 @@ class _PracticeScreenState extends State<PracticeScreen> {
             _buildConfigurationCard(),
             const SizedBox(height: 16),
             _buildSmartPracticeCard(),
-          const SizedBox(height: 24),
-          Text(
-            'Select Test Type',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 16),
-          _buildTestTypeCard(
-            context,
-            TestType.quickAssessment,
-            Icons.timer_outlined,
-            Colors.orange,
-          ),
-          const SizedBox(height: 12),
-          _buildTestTypeCard(
-            context,
-            TestType.standardPractice,
-            Icons.assignment_outlined,
-            Colors.blue,
-          ),
-          const SizedBox(height: 12),
-          _buildTestTypeCard(
-            context,
-            TestType.fullMock,
-            Icons.quiz_outlined,
-            Colors.purple,
-          ),
-        ],
-      ),
+            const SizedBox(height: 24),
+            Text(
+              'Select Test Type',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            _buildTestTypeCard(
+              context,
+              TestType.quickAssessment,
+              Icons.timer_outlined,
+              Colors.orange,
+            ),
+            const SizedBox(height: 12),
+            _buildTestTypeCard(
+              context,
+              TestType.standardPractice,
+              Icons.assignment_outlined,
+              Colors.blue,
+            ),
+            const SizedBox(height: 12),
+            _buildTestTypeCard(
+              context,
+              TestType.fullMock,
+              Icons.quiz_outlined,
+              Colors.purple,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -84,23 +91,23 @@ class _PracticeScreenState extends State<PracticeScreen> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<CitizenshipLevel>(
-              value: _selectedLevel,
+            DropdownButtonFormField<Difficulty>(
+              value: _selectedDifficulty,
               decoration: const InputDecoration(
-                labelText: 'Grade Level',
+                labelText: 'Difficulty Level',
                 border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.school),
+                prefixIcon: Icon(Icons.tune),
               ),
-              items: CitizenshipLevel.values.map((level) {
+              items: Difficulty.values.map((difficulty) {
                 return DropdownMenuItem(
-                  value: level,
-                  child: Text(level.displayName),
+                  value: difficulty,
+                  child: Text(difficulty.displayName),
                 );
               }).toList(),
               onChanged: (value) {
                 if (value != null) {
                   setState(() {
-                    _selectedLevel = value;
+                    _selectedDifficulty = value;
                   });
                 }
               },
@@ -129,7 +136,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Question Types',
+              'Topics',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
@@ -180,7 +187,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: color, size: 32),
@@ -217,7 +224,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
   void _startTest(TestType type) {
     final config = TestConfiguration(
       testType: type,
-      level: _selectedLevel,
+      difficulty: _selectedDifficulty,
       selectedTypes: _selectedTypes.toList(),
     );
 
@@ -239,18 +246,20 @@ class _PracticeScreenState extends State<PracticeScreen> {
   }
 
   Widget _buildSmartPracticeCard() {
-    final summary = _smartLearning.getSummary();
-    final hasData = summary.totalQuestionsAttempted > 0;
+    final weakAreas = _smartLearning.getWeakAreas();
+    final reviewDue = _smartLearning.getQuestionsForReview();
+    final bookmarkCount = _smartLearning.bookmarkCount;
+    final hasData = _smartLearning.allStats.isNotEmpty;
     
     return Card(
       clipBehavior: Clip.antiAlias,
-      color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+      color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.5),
             child: Row(
               children: [
                 Icon(
@@ -296,19 +305,19 @@ class _PracticeScreenState extends State<PracticeScreen> {
                       _buildSmartStat(
                         Icons.warning_amber,
                         Colors.orange,
-                        '${summary.weakAreaCount}',
+                        '${weakAreas.length}',
                         'Weak Areas',
                       ),
                       _buildSmartStat(
                         Icons.replay,
                         Colors.blue,
-                        '${summary.reviewDueCount}',
+                        '${reviewDue.length}',
                         'Due Review',
                       ),
                       _buildSmartStat(
                         Icons.bookmark,
                         Theme.of(context).colorScheme.primary,
-                        '${summary.bookmarkCount}',
+                        '$bookmarkCount',
                         'Bookmarked',
                       ),
                     ],
@@ -327,7 +336,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: summary.bookmarkCount > 0 ? () => _startSmartPractice(bookmarksOnly: true) : null,
+                        onPressed: bookmarkCount > 0 ? () => _startSmartPractice(bookmarksOnly: true) : null,
                         icon: const Icon(Icons.bookmark),
                         label: const Text('Bookmarks'),
                       ),
@@ -364,7 +373,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
   void _startSmartPractice({bool focusWeakAreas = false, bool bookmarksOnly = false}) {
     final config = TestConfiguration(
       testType: TestType.standardPractice,
-      level: _selectedLevel,
+      difficulty: _selectedDifficulty,
       selectedTypes: _selectedTypes.toList(),
     );
 
@@ -385,14 +394,6 @@ class _PracticeScreenState extends State<PracticeScreen> {
         );
         return;
       }
-    } else if (focusWeakAreas) {
-      // Prioritize based on weak areas and review
-      questions = _smartLearning.prioritizeQuestions(
-        questions,
-        includeReviewQuestions: true,
-        focusWeakAreas: true,
-        excludeMastered: true,
-      );
     }
 
     // Take up to 15 questions for smart practice
@@ -409,7 +410,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
     final smartConfig = TestConfiguration(
       testType: TestType.standardPractice,
-      level: _selectedLevel,
+      difficulty: _selectedDifficulty,
       selectedTypes: _selectedTypes.toList(),
       questionCount: questions.length,
       timeInMinutes: questions.length * 2, // 2 min per question

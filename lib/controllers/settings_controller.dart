@@ -8,11 +8,11 @@ class SettingsController with ChangeNotifier {
 
   ThemeMode _themeMode = ThemeMode.system;
   Language _language = Language.english;
-  CitizenshipLevel _defaultLevel = CitizenshipLevel.level12;
+  Difficulty _defaultDifficulty = Difficulty.medium;
 
   ThemeMode get themeMode => _themeMode;
   Language get language => _language;
-  CitizenshipLevel get defaultLevel => _defaultLevel;
+  Difficulty get defaultDifficulty => _defaultDifficulty;
 
   void toggleTheme(bool isDark) {
     _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
@@ -24,8 +24,8 @@ class SettingsController with ChangeNotifier {
     notifyListeners();
   }
 
-  void setLevel(CitizenshipLevel level) {
-    _defaultLevel = level;
+  void setDifficulty(Difficulty difficulty) {
+    _defaultDifficulty = difficulty;
     notifyListeners();
   }
 }

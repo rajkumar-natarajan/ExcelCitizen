@@ -30,7 +30,11 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
     return AnimatedBuilder(
       animation: _smartLearning,
       builder: (context, _) {
-        final summary = _smartLearning.getSummary();
+        final allStats = _smartLearning.allStats;
+        int totalAttempts = 0;
+        for (var stat in allStats.values) {
+          totalAttempts += stat.totalAttempts;
+        }
         
         return Scaffold(
           appBar: AppBar(
@@ -47,7 +51,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
           body: TabBarView(
             controller: _tabController,
             children: [
-              _buildOverviewTab(context, summary),
+              _buildOverviewTab(context, totalAttempts),
               _buildTrendsTab(context),
               _buildTimeStatsTab(context),
             ],
@@ -57,15 +61,15 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
     );
   }
 
-  Widget _buildOverviewTab(BuildContext context, SmartLearningSummary summary) {
+  Widget _buildOverviewTab(BuildContext context, int totalAttempts) {
     final allStats = _smartLearning.allStats;
     
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _buildSummaryCard(context, summary),
+        _buildSummaryCard(context, totalAttempts),
         const SizedBox(height: 16),
-        _buildSmartLearningCard(context, summary),
+        _buildSmartLearningCard(context),
         const SizedBox(height: 24),
         Text(
           'Performance by Category',
@@ -74,21 +78,39 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
         const SizedBox(height: 16),
         _buildCategoryProgress(
           context, 
-          'Verbal', 
-          _calculateCategoryAccuracy(allStats, QuestionType.verbal),
+          'Rights & Responsibilities', 
+          _calculateCategoryAccuracy(allStats, QuestionType.rightsResponsibilities),
           Colors.blue,
         ),
         _buildCategoryProgress(
           context, 
-          'Quantitative', 
-          _calculateCategoryAccuracy(allStats, QuestionType.quantitative),
+          'History', 
+          _calculateCategoryAccuracy(allStats, QuestionType.history),
+          Colors.red,
+        ),
+        _buildCategoryProgress(
+          context, 
+          'Government', 
+          _calculateCategoryAccuracy(allStats, QuestionType.government),
+          Colors.purple,
+        ),
+        _buildCategoryProgress(
+          context, 
+          'Geography', 
+          _calculateCategoryAccuracy(allStats, QuestionType.geography),
           Colors.green,
         ),
         _buildCategoryProgress(
           context, 
-          'Non-Verbal', 
-          _calculateCategoryAccuracy(allStats, QuestionType.nonVerbal),
+          'Symbols', 
+          _calculateCategoryAccuracy(allStats, QuestionType.symbols),
           Colors.orange,
+        ),
+        _buildCategoryProgress(
+          context, 
+          'Economy', 
+          _calculateCategoryAccuracy(allStats, QuestionType.economy),
+          Colors.teal,
         ),
         const SizedBox(height: 24),
         Text(
@@ -103,15 +125,12 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
 
   Widget _buildTrendsTab(BuildContext context) {
     final trend = _smartLearning.getAccuracyTrend();
-    final dailyPractice = _smartLearning.getDailyPracticeCount(7);
     final recentSessions = _smartLearning.getRecentSessions(10);
     
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         _buildAccuracyTrendChart(context, trend),
-        const SizedBox(height: 24),
-        _buildDailyPracticeChart(context, dailyPractice),
         const SizedBox(height: 24),
         Text(
           'Recent Test Sessions',
@@ -188,77 +207,6 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                 p.label.split('-').last,
                 style: Theme.of(context).textTheme.bodySmall,
               )).toList(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDailyPracticeChart(BuildContext context, List<TrendPoint> dailyPractice) {
-    if (dailyPractice.isEmpty || dailyPractice.every((p) => p.value == 0)) {
-      return _buildEmptyChartCard(
-        context,
-        'Daily Practice',
-        'Start practicing to track your daily activity.',
-        Icons.calendar_today,
-      );
-    }
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Last 7 Days Activity',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              height: 120,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: dailyPractice.map((p) {
-                  final maxVal = dailyPractice.map((d) => d.value).reduce((a, b) => a > b ? a : b);
-                  final height = maxVal > 0 ? (p.value / maxVal) * 80 : 0.0;
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        '${p.value.toInt()}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        width: 30,
-                        height: height.clamp(4.0, 80.0),
-                        decoration: BoxDecoration(
-                          color: p.value > 0 
-                              ? Theme.of(context).colorScheme.primary
-                              : Colors.grey.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        p.label,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  );
-                }).toList(),
-              ),
             ),
           ],
         ),
@@ -358,13 +306,13 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
           margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: _getColorForAccuracy(session.accuracy).withOpacity(0.2),
+              backgroundColor: _getColorForAccuracy(session.accuracy * 100).withValues(alpha: 0.2),
               child: Text(
-                '${session.accuracy.toInt()}%',
+                '${(session.accuracy * 100).toInt()}%',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: _getColorForAccuracy(session.accuracy),
+                  color: _getColorForAccuracy(session.accuracy * 100),
                 ),
               ),
             ),
@@ -379,7 +327,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 Text(
-                  session.level.replaceAll('_', ' '),
+                  session.testType,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey,
                   ),
@@ -393,11 +341,11 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
   }
 
   Widget _buildTimeOverviewCard(BuildContext context) {
-    final verbal = _smartLearning.getAverageTimeForType(QuestionType.verbal);
-    final quant = _smartLearning.getAverageTimeForType(QuestionType.quantitative);
-    final nonVerbal = _smartLearning.getAverageTimeForType(QuestionType.nonVerbal);
+    final rights = _smartLearning.getAverageTimeForType(QuestionType.rightsResponsibilities);
+    final history = _smartLearning.getAverageTimeForType(QuestionType.history);
+    final government = _smartLearning.getAverageTimeForType(QuestionType.government);
     
-    final hasData = verbal > 0 || quant > 0 || nonVerbal > 0;
+    final hasData = rights > 0 || history > 0 || government > 0;
     
     if (!hasData) {
       return _buildEmptyChartCard(
@@ -430,9 +378,9 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildTimeStatCircle(context, 'Verbal', verbal, Colors.blue),
-                _buildTimeStatCircle(context, 'Quant', quant, Colors.green),
-                _buildTimeStatCircle(context, 'Non-Verbal', nonVerbal, Colors.orange),
+                _buildTimeStatCircle(context, 'Rights', rights, Colors.blue),
+                _buildTimeStatCircle(context, 'History', history, Colors.red),
+                _buildTimeStatCircle(context, 'Govt', government, Colors.purple),
               ],
             ),
           ],
@@ -449,7 +397,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
           height: 70,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             border: Border.all(color: color, width: 3),
           ),
           child: Center(
@@ -470,36 +418,74 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
   }
 
   Widget _buildTimeByCategory(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: _buildTimeCategoryCard(
-            context,
-            'Verbal',
-            _smartLearning.getAverageTimeForType(QuestionType.verbal),
-            Colors.blue,
-            Icons.text_fields,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: _buildTimeCategoryCard(
+                context,
+                'Rights',
+                _smartLearning.getAverageTimeForType(QuestionType.rightsResponsibilities),
+                Colors.blue,
+                Icons.balance,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildTimeCategoryCard(
+                context,
+                'History',
+                _smartLearning.getAverageTimeForType(QuestionType.history),
+                Colors.red,
+                Icons.history_edu,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildTimeCategoryCard(
+                context,
+                'Govt',
+                _smartLearning.getAverageTimeForType(QuestionType.government),
+                Colors.purple,
+                Icons.account_balance,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _buildTimeCategoryCard(
-            context,
-            'Quantitative',
-            _smartLearning.getAverageTimeForType(QuestionType.quantitative),
-            Colors.green,
-            Icons.calculate,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _buildTimeCategoryCard(
-            context,
-            'Non-Verbal',
-            _smartLearning.getAverageTimeForType(QuestionType.nonVerbal),
-            Colors.orange,
-            Icons.shape_line,
-          ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _buildTimeCategoryCard(
+                context,
+                'Geography',
+                _smartLearning.getAverageTimeForType(QuestionType.geography),
+                Colors.green,
+                Icons.map,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildTimeCategoryCard(
+                context,
+                'Symbols',
+                _smartLearning.getAverageTimeForType(QuestionType.symbols),
+                Colors.orange,
+                Icons.flag,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildTimeCategoryCard(
+                context,
+                'Economy',
+                _smartLearning.getAverageTimeForType(QuestionType.economy),
+                Colors.teal,
+                Icons.trending_up,
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -564,24 +550,11 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
           child: ListTile(
             title: Text(entry.key),
             subtitle: Text('${stats.questionCount} questions answered'),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'Avg: ${stats.averageTime.toStringAsFixed(1)}s',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                if (stats.fastestTime != null && stats.slowestTime != null)
-                  Text(
-                    '${stats.fastestTime}s - ${stats.slowestTime}s',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey,
-                    ),
-                  ),
-              ],
+            trailing: Text(
+              'Avg: ${stats.averageTime.toStringAsFixed(1)}s',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         );
@@ -623,34 +596,87 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
 
   List<String> _getSubtypesForType(QuestionType type) {
     switch (type) {
-      case QuestionType.verbal:
-        return ['Synonyms', 'Antonyms', 'Analogies', 'Sentence Completion', 'Classification'];
-      case QuestionType.quantitative:
-        return ['Number Analogies', 'Number Series', 'Quantitative Relations'];
-      case QuestionType.nonVerbal:
-        return ['Figure Analogies', 'Figure Classification', 'Pattern Completion'];
+      case QuestionType.rightsResponsibilities:
+        return [
+          RightsSubType.citizenshipRights.value,
+          RightsSubType.responsibilities.value,
+          RightsSubType.charterOfRights.value,
+          RightsSubType.equality.value,
+        ];
+      case QuestionType.history:
+        return [
+          HistorySubType.aboriginal.value,
+          HistorySubType.exploration.value,
+          HistorySubType.confederation.value,
+          HistorySubType.modernCanada.value,
+          HistorySubType.worldWars.value,
+        ];
+      case QuestionType.government:
+        return [
+          GovernmentSubType.federalGovernment.value,
+          GovernmentSubType.provincialGovernment.value,
+          GovernmentSubType.elections.value,
+          GovernmentSubType.monarchy.value,
+        ];
+      case QuestionType.geography:
+        return [
+          GeographySubType.provinces.value,
+          GeographySubType.capitals.value,
+          GeographySubType.regions.value,
+          GeographySubType.naturalResources.value,
+        ];
+      case QuestionType.symbols:
+        return [
+          SymbolsSubType.nationalSymbols.value,
+          SymbolsSubType.holidays.value,
+          SymbolsSubType.anthem.value,
+          SymbolsSubType.flags.value,
+        ];
+      case QuestionType.economy:
+        return ['economy_general', 'trade', 'industries'];
     }
   }
 
-  Widget _buildSummaryCard(BuildContext context, SmartLearningSummary summary) {
+  Widget _buildSummaryCard(BuildContext context, int totalAttempts) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildStat(context, 'Attempted', '${summary.totalQuestionsAttempted}'),
-            _buildStat(context, 'Mastered', '${summary.masteredCount}'),
-            _buildStat(context, 'Bookmarks', '${summary.bookmarkCount}'),
+            _buildStat(context, 'Attempted', '$totalAttempts'),
+            _buildStat(context, 'Mastered', '${_smartLearning.masteredCount}'),
+            _buildStat(context, 'Bookmarks', '${_smartLearning.bookmarkCount}'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSmartLearningCard(BuildContext context, SmartLearningSummary summary) {
+  Widget _buildStat(BuildContext context, String label, String value) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSmartLearningCard(BuildContext context) {
+    final weakAreas = _smartLearning.getWeakAreas();
+    final reviewDue = _smartLearning.getQuestionsForReview();
+    
     return Card(
-      color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+      color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -676,7 +702,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                     context,
                     Icons.warning_amber_rounded,
                     Colors.orange,
-                    '${summary.weakAreaCount}',
+                    '${weakAreas.length}',
                     'Weak Areas',
                   ),
                 ),
@@ -685,7 +711,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                     context,
                     Icons.replay_rounded,
                     Colors.blue,
-                    '${summary.reviewDueCount}',
+                    '${reviewDue.length}',
                     'Due for Review',
                   ),
                 ),
@@ -704,108 +730,19 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
     String value,
     String label,
   ) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, color: color),
-        ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildWeakAreasSection(BuildContext context) {
-    final weakAreas = _smartLearning.getWeakSubTypes();
-    
-    if (weakAreas.isEmpty) {
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 32,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  _smartLearning.getSummary().totalQuestionsAttempted > 0
-                      ? 'Great job! No weak areas identified. Keep practicing!'
-                      : 'Complete some practice tests to identify areas for improvement.',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Column(
-      children: weakAreas.map((subtype) {
-        final stats = _smartLearning.getStats(subtype);
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.warning_amber, color: Colors.orange),
-            ),
-            title: Text(subtype),
-            subtitle: Text(
-              'Accuracy: ${stats?.accuracy.toStringAsFixed(1)}% (${stats?.correctAttempts}/${stats?.totalAttempts})',
-            ),
-            trailing: FilledButton.tonal(
-              onPressed: () {
-                // TODO: Navigate to practice with this subtype
-              },
-              child: const Text('Practice'),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildStat(BuildContext context, String label, String value) {
     return Column(
       children: [
+        Icon(icon, color: color),
+        const SizedBox(height: 4),
         Text(
           value,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodyMedium,
+          style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
     );
@@ -818,14 +755,14 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
     Color color,
   ) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(label, style: Theme.of(context).textTheme.titleMedium),
+              Text(label),
               Text('${(progress * 100).toInt()}%'),
             ],
           ),
@@ -833,12 +770,56 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
           LinearProgressIndicator(
             value: progress,
             color: color,
-            backgroundColor: color.withOpacity(0.1),
+            backgroundColor: color.withValues(alpha: 0.1),
             minHeight: 8,
             borderRadius: BorderRadius.circular(4),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildWeakAreasSection(BuildContext context) {
+    final weakAreas = _smartLearning.getWeakAreas();
+    
+    if (weakAreas.isEmpty) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'No weak areas identified yet. Keep practicing!',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: weakAreas.take(5).map((area) {
+        final stats = _smartLearning.getStats(area);
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: ListTile(
+            leading: const Icon(Icons.warning_amber, color: Colors.orange),
+            title: Text(area),
+            trailing: Text(
+              '${((stats?.accuracy ?? 0) * 100).toInt()}%',
+              style: const TextStyle(
+                color: Colors.orange,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

@@ -24,11 +24,11 @@ class SettingsScreen extends StatelessWidget {
                 onTap: () => _showLanguageDialog(context, controller),
               ),
               ListTile(
-                leading: const Icon(Icons.school),
-                title: const Text('Grade Level'),
-                subtitle: Text(controller.defaultLevel.displayName),
+                leading: const Icon(Icons.tune),
+                title: const Text('Difficulty Level'),
+                subtitle: Text(controller.defaultDifficulty.displayName),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showLevelDialog(context, controller),
+                onTap: () => _showDifficultyDialog(context, controller),
               ),
               _buildSectionHeader(context, 'App'),
               SwitchListTile(
@@ -44,10 +44,10 @@ class SettingsScreen extends StatelessWidget {
                 onChanged: (value) {},
               ),
               _buildSectionHeader(context, 'About'),
-              ListTile(
-                leading: const Icon(Icons.info_outline),
-                title: const Text('Version'),
-                subtitle: const Text('1.0.0'),
+              const ListTile(
+                leading: Icon(Icons.info_outline),
+                title: Text('Version'),
+                subtitle: Text('1.0.0'),
               ),
               ListTile(
                 leading: const Icon(Icons.privacy_tip_outlined),
@@ -89,32 +89,23 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _showLevelDialog(BuildContext context, SettingsController controller) {
+  void _showDifficultyDialog(BuildContext context, SettingsController controller) {
     showDialog(
       context: context,
       builder: (context) => SimpleDialog(
-        title: const Text('Select Grade Level'),
-        children: CitizenshipLevel.values.map((level) {
+        title: const Text('Select Difficulty'),
+        children: Difficulty.values.map((difficulty) {
           return SimpleDialogOption(
             onPressed: () {
-              controller.setLevel(level);
+              controller.setDifficulty(difficulty);
               Navigator.pop(context);
             },
             child: Row(
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(level.displayName),
-                      Text(
-                        'Grade ${level.gradeRange}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
+                  child: Text(difficulty.displayName),
                 ),
-                if (controller.defaultLevel == level)
+                if (controller.defaultDifficulty == difficulty)
                   const Icon(Icons.check, color: Colors.blue),
               ],
             ),

@@ -195,6 +195,7 @@ class Question {
 /// Test configuration
 class TestConfiguration {
   final TestType testType;
+  final Difficulty? difficulty;
   final int questionCount;
   final int timeInMinutes;
   final List<QuestionType>? selectedTypes;
@@ -203,6 +204,7 @@ class TestConfiguration {
 
   TestConfiguration({
     required this.testType,
+    this.difficulty,
     int? questionCount,
     int? timeInMinutes,
     this.selectedTypes,
@@ -213,6 +215,7 @@ class TestConfiguration {
 
   TestConfiguration copyWith({
     TestType? testType,
+    Difficulty? difficulty,
     int? questionCount,
     int? timeInMinutes,
     List<QuestionType>? selectedTypes,
@@ -221,6 +224,7 @@ class TestConfiguration {
   }) {
     return TestConfiguration(
       testType: testType ?? this.testType,
+      difficulty: difficulty ?? this.difficulty,
       questionCount: questionCount ?? this.questionCount,
       timeInMinutes: timeInMinutes ?? this.timeInMinutes,
       selectedTypes: selectedTypes ?? this.selectedTypes,
