@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../controllers/gamification_controller.dart';
 import '../controllers/settings_controller.dart';
+import '../data/question_data_manager.dart';
 import '../models/question.dart';
 import '../widgets/canadian_theme.dart';
 import 'achievements_screen.dart';
+import 'test_session_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final Function(int) onNavigate;
@@ -35,6 +37,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool get _isFrench => _settings.language == Language.french;
 
   void _refresh() => setState(() {});
+
+  void _startCategoryPractice(QuestionType type) {
+    final dataManager = QuestionDataManager();
+    final questions = dataManager.getQuestionsByType(type);
+    
+    if (questions.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_isFrench ? 'Aucune question disponible' : 'No questions available')),
+      );
+      return;
+    }
+
+    // Shuffle and take up to 10 questions for quick practice
+    final shuffled = List<Question>.from(questions)..shuffle();
+    final selectedQuestions = shuffled.take(10).toList();
+
+    final config = TestConfiguration(
+      testType: TestType.standardPractice,
+      questionCount: selectedQuestions.length,
+      timeInMinutes: 10,
+      difficulty: _settings.defaultDifficulty,
+      selectedTypes: {type},
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TestSessionScreen(
+          configuration: config,
+          questions: selectedQuestions,
+          language: _settings.language,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -429,28 +466,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _isFrench ? 'Histoire' : 'History',
           Icons.history_edu,
           Colors.blue,
-          () => widget.onNavigate(1),
+          () => _startCategoryPractice(QuestionType.history),
         ),
         _buildActionCard(
           context,
           _isFrench ? 'Gouvernement' : 'Government',
           Icons.account_balance,
           Colors.green,
-          () => widget.onNavigate(1),
+          () => _startCategoryPractice(QuestionType.government),
         ),
         _buildActionCard(
           context,
           _isFrench ? 'Droits' : 'Rights',
           Icons.gavel,
           Colors.orange,
-          () => widget.onNavigate(1),
+          () => _startCategoryPractice(QuestionType.rightsResponsibilities),
         ),
         _buildActionCard(
           context,
           _isFrench ? 'Géographie' : 'Geography',
           Icons.map,
           Colors.purple,
-          () => widget.onNavigate(1),
+          () => _startCategoryPractice(QuestionType.geography),
         ),
       ],
     );

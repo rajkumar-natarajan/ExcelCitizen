@@ -6,18 +6,21 @@ A comprehensive Flutter application designed to help users prepare for the Canad
 
 ### Core Functionality
 - **Practice Tests**: Multiple test modes including Quick Assessment, Standard Practice, and Full Mock exams
-- **Question Bank**: Comprehensive coverage of all citizenship test categories
+- **Question Bank**: 180+ comprehensive bilingual questions covering all citizenship test categories
 - **Smart Learning**: Spaced repetition and performance-based question prioritization
 - **Bookmark System**: Save important questions for later review
 - **Progress Tracking**: Detailed analytics and performance insights
+- **Bilingual Support**: Full English and French translations for all questions and explanations
 
-### Test Categories
-- 🏛️ **Rights & Responsibilities** - Canadian rights, freedoms, and civic duties
-- 📜 **History** - Canadian history from Indigenous peoples to modern times
-- ⚖️ **Government** - Federal, provincial, and municipal governance
-- 🗺️ **Geography** - Provinces, territories, and natural features
-- 🍁 **Symbols** - National symbols, anthem, and official emblems
-- 💼 **Economy** - Canadian economy, industries, and trade
+### Question Bank (180+ Questions)
+| Category | Questions | Topics Covered |
+|----------|-----------|----------------|
+| 🏛️ **Rights & Responsibilities** | 28 | Charter of Rights, Equality, Citizenship Rights, Civic Duties |
+| 📜 **History** | 34 | Confederation, Aboriginal Peoples, Exploration, World Wars, Modern Canada |
+| ⚖️ **Government** | 32 | Federal/Provincial/Municipal Government, Elections, Monarchy, Justice System |
+| 🗺️ **Geography** | 30 | Provincial Capitals, Provinces & Territories, Regions, Natural Resources |
+| 🍁 **Symbols** | 28 | National Symbols, Anthem, Canadian Holidays, Flags |
+| 💼 **Economy** | 28 | Trade, Natural Resources, Industries, Agriculture, Banking |
 
 ### Test Modes
 | Mode | Questions | Time | Purpose |
