@@ -40,8 +40,8 @@ class SettingsScreen extends StatelessWidget {
               SwitchListTile(
                 secondary: const Icon(Icons.notifications),
                 title: const Text('Notifications'),
-                value: true,
-                onChanged: (value) {},
+                value: controller.notificationsEnabled,
+                onChanged: (value) => controller.toggleNotifications(value),
               ),
               _buildSectionHeader(context, 'About'),
               const ListTile(
