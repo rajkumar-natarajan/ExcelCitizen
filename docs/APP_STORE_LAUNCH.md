@@ -465,28 +465,71 @@ support@curiousdev.app
 
 ---
 
+## 🔨 Build & Deployment Commands
+
+### Quick Build and Upload
+
+```bash
+# Navigate to project
+cd /Users/rajkumarnatarajan/Documents/raj/excel_citizen_flutter
+
+# Clean and get dependencies
+flutter clean && flutter pub get
+
+# Archive the app (uses manual signing with ExcelCitizen AppStore profile)
+xcodebuild -workspace ios/Runner.xcworkspace \
+  -scheme Runner \
+  -configuration Release \
+  -destination generic/platform=iOS \
+  -archivePath build/Runner.xcarchive \
+  archive DEVELOPMENT_TEAM=Y62BAT7CF4
+
+# Export and upload to App Store Connect
+xcodebuild -exportArchive \
+  -archivePath build/Runner.xcarchive \
+  -exportOptionsPlist ios/ExportOptions.plist \
+  -exportPath build/ipa \
+  -allowProvisioningUpdates
+```
+
+### Signing Configuration
+
+| Setting | Value |
+|---------|-------|
+| **Team ID** | Y62BAT7CF4 |
+| **Bundle ID** | com.curiousdev.excelCitizenFlutter |
+| **Distribution Certificate** | Apple Distribution: Rajkumar Natarajan (Y62BAT7CF4) |
+| **Provisioning Profile** | ExcelCitizen AppStore |
+| **Code Sign Style** | Manual (for Release/Profile configurations) |
+
+### App Icon Requirements
+- All icons must have **no alpha channel** (transparency)
+- Use ImageMagick to remove alpha: `convert icon.png -background white -alpha remove -alpha off icon.png`
+
+---
+
 ## ✅ Final Submission Checklist
 
-- [ ] App tested on multiple devices
+- [x] App tested on multiple devices
+- [x] App icons have no alpha channel
+- [x] Provisioning profile created (ExcelCitizen AppStore)
+- [x] ExportOptions.plist configured
+- [x] Archive built successfully
+- [x] Uploaded to App Store Connect
 - [ ] All screenshots uploaded
 - [ ] All metadata complete
 - [ ] Privacy policy live
 - [ ] Support URL live
-- [ ] Archive built and uploaded
-- [ ] TestFlight tested
-- [ ] Submit for review
+- [ ] TestFlight testing complete
+- [ ] Submit for App Store review
 
 ---
 
-## 📅 Estimated Timeline
+## 📅 Build History
 
-| Phase | Duration | Tasks |
-|-------|----------|-------|
-| Preparation | 1-2 days | Screenshots, metadata, policies |
-| TestFlight | 3-7 days | Internal testing, bug fixes |
-| Submission | 1 day | Upload and submit |
-| App Review | 1-3 days | Apple review process |
-| **Total** | **~1-2 weeks** | From preparation to launch |
+| Version | Build | Date | Status |
+|---------|-------|------|--------|
+| 1.0.0 | 1 | December 24, 2025 | Uploaded to TestFlight |
 
 ---
 

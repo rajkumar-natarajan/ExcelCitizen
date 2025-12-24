@@ -2,7 +2,7 @@
 
 ## Version 1.0.0 - Initial Release 🍁
 
-*Release Date: [TBD]*
+*Release Date: December 24, 2025*
 
 ### 🎉 Welcome to ExcelCitizen!
 

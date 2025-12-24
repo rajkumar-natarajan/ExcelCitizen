@@ -11,30 +11,70 @@ cd /Users/rajkumarnatarajan/Documents/raj/excel_citizen_flutter
 # Clean and rebuild
 flutter clean
 flutter pub get
-
-# Build release archive
-flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
 ```
 
-### Step 2: Create ExportOptions.plist (if not exists)
+### Step 2: Archive and Upload (Recommended Method)
 
-Create `ios/ExportOptions.plist`:
+Since automatic provisioning requires registered devices, use xcodebuild with manual signing:
+
+```bash
+# Archive the app
+xcodebuild -workspace ios/Runner.xcworkspace \
+  -scheme Runner \
+  -configuration Release \
+  -destination generic/platform=iOS \
+  -archivePath build/Runner.xcarchive \
+  archive DEVELOPMENT_TEAM=Y62BAT7CF4
+
+# Export and upload to App Store Connect
+xcodebuild -exportArchive \
+  -archivePath build/Runner.xcarchive \
+  -exportOptionsPlist ios/ExportOptions.plist \
+  -exportPath build/ipa \
+  -allowProvisioningUpdates
+```
+
+### Step 3: ExportOptions.plist
+
+The project includes `ios/ExportOptions.plist` configured for App Store Connect upload:
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
     <key>method</key>
-    <string>app-store</string>
+    <string>app-store-connect</string>
     <key>teamID</key>
-    <string>YOUR_TEAM_ID</string>
+    <string>Y62BAT7CF4</string>
     <key>uploadSymbols</key>
     <true/>
-    <key>uploadBitcode</key>
-    <false/>
+    <key>signingStyle</key>
+    <string>automatic</string>
+    <key>destination</key>
+    <string>upload</string>
 </dict>
 </plist>
 ```
+
+---
+
+## 📋 Prerequisites
+
+### Required Certificates & Profiles
+
+1. **Apple Distribution Certificate**: `Apple Distribution: Rajkumar Natarajan (Y62BAT7CF4)`
+2. **App Store Distribution Profile**: `ExcelCitizen AppStore`
+3. **Bundle ID**: `com.curiousdev.excelCitizenFlutter`
+
+### Creating Distribution Profile (if needed)
+
+1. Go to [Apple Developer Portal - Profiles](https://developer.apple.com/account/resources/profiles/add)
+2. Select **Distribution** → **App Store Connect**
+3. Select App ID: `com.curiousdev.excelCitizenFlutter`
+4. Select your Apple Distribution certificate
+5. Name: `ExcelCitizen AppStore`
+6. Download and double-click to install
 
 ---
 
@@ -72,7 +112,7 @@ Navigate to **App Information** and fill:
 
 ---
 
-## 🔨 Building with Xcode
+## 🔨 Building with Xcode GUI (Alternative)
 
 ### Manual Archive Process
 
