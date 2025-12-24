@@ -58,7 +58,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       questionCount: selectedQuestions.length,
       timeInMinutes: 10,
       difficulty: _settings.defaultDifficulty,
-      selectedTypes: {type},
+      selectedTypes: [type],
     );
 
     Navigator.push(

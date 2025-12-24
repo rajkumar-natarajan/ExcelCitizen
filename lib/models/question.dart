@@ -44,6 +44,7 @@ enum HistorySubType {
 enum GovernmentSubType {
   federalGovernment('federal', 'Federal Government'),
   provincialGovernment('provincial', 'Provincial/Territorial'),
+  municipalGovernment('municipal', 'Municipal Government'),
   elections('elections', 'Elections & Voting'),
   monarchy('monarchy', 'Constitutional Monarchy');
 
