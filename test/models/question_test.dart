@@ -236,7 +236,8 @@ void main() {
     test('GovernmentSubType should have correct values', () {
       expect(GovernmentSubType.federalGovernment.value, 'federal');
       expect(GovernmentSubType.elections.value, 'elections');
-      expect(GovernmentSubType.values.length, 4);
+      expect(GovernmentSubType.monarchy.value, 'monarchy');
+      expect(GovernmentSubType.values.length, 5);
     });
 
     test('GeographySubType should have correct values', () {

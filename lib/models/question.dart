@@ -1,5 +1,6 @@
 // Question models for ExcelCitizen Flutter App
 // Based on Canadian Citizenship Test structure (Discover Canada guide)
+import 'dart:math';
 
 /// Question categories matching Citizenship Test topics
 enum QuestionType {
@@ -144,6 +145,32 @@ class Question {
   }) : stemFrench = stemFrench ?? stem,
        optionsFrench = optionsFrench ?? options,
        explanationFrench = explanationFrench ?? explanation;
+
+  /// Return a copy with options shuffled consistently across languages.
+  Question withShuffledOptions(Random random) {
+    if (options.length <= 1) return this;
+
+    final indices = List<int>.generate(options.length, (i) => i)
+      ..shuffle(random);
+    final shuffledOptions = [for (final i in indices) options[i]];
+    final shuffledOptionsFrench = [for (final i in indices) optionsFrench[i]];
+    final newCorrectIndex = indices.indexOf(correctAnswer);
+
+    return Question(
+      id: id,
+      type: type,
+      subType: subType,
+      stem: stem,
+      stemFrench: stemFrench,
+      options: shuffledOptions,
+      optionsFrench: shuffledOptionsFrench,
+      correctAnswer: newCorrectIndex,
+      explanation: explanation,
+      explanationFrench: explanationFrench,
+      difficulty: difficulty,
+      imageAsset: imageAsset,
+    );
+  }
 
   String getStem(Language language) =>
       language == Language.french ? stemFrench : stem;

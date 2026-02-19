@@ -62,7 +62,8 @@ class QuestionDataManager {
       questions.shuffle(Random());
     }
 
-    return questions.take(config.questionCount).toList();
+    final selected = questions.take(config.questionCount).toList();
+    return _shuffleQuestionOptions(selected);
   }
 
   /// Get a random selection of questions
@@ -74,7 +75,8 @@ class QuestionDataManager {
     }
     
     questions.shuffle(Random());
-    return questions.take(count).toList();
+    final selected = questions.take(count).toList();
+    return _shuffleQuestionOptions(selected);
   }
 
   /// Get question by ID
@@ -84,6 +86,11 @@ class QuestionDataManager {
     } catch (e) {
       return null;
     }
+  }
+
+  List<Question> _shuffleQuestionOptions(List<Question> questions) {
+    final random = Random();
+    return questions.map((q) => q.withShuffledOptions(random)).toList();
   }
 
   // ==================== RIGHTS & RESPONSIBILITIES QUESTIONS ====================
