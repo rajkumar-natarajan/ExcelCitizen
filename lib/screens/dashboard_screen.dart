@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../controllers/gamification_controller.dart';
 import '../controllers/settings_controller.dart';
@@ -50,8 +51,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     // Shuffle and take up to 10 questions for quick practice
-    final shuffled = List<Question>.from(questions)..shuffle();
-    final selectedQuestions = shuffled.take(10).toList();
+    final random = Random();
+    final shuffled = List<Question>.from(questions)..shuffle(random);
+    final selectedQuestions = shuffled.take(10).map((q) => q.withShuffledOptions(random)).toList();
 
     final config = TestConfiguration(
       testType: TestType.standardPractice,
