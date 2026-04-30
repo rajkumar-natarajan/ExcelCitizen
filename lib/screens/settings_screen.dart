@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../controllers/settings_controller.dart';
 import '../models/question.dart';
 
@@ -47,12 +48,16 @@ class SettingsScreen extends StatelessWidget {
               const ListTile(
                 leading: Icon(Icons.info_outline),
                 title: Text('Version'),
-                subtitle: Text('1.0.0'),
+                subtitle: Text('1.0.1'),
               ),
               ListTile(
                 leading: const Icon(Icons.privacy_tip_outlined),
                 title: const Text('Privacy Policy'),
-                onTap: () {},
+                trailing: const Icon(Icons.open_in_new, size: 18),
+                onTap: () => launchUrl(
+                  Uri.parse('https://rajkumar-natarajan.github.io/ExcelCitizen/privacy.html'),
+                  mode: LaunchMode.externalApplication,
+                ),
               ),
             ],
           ),
