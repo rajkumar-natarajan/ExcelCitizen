@@ -527,9 +527,142 @@ xcodebuild -exportArchive \
 
 ## 📅 Build History
 
-| Version | Build | Date | Status |
-|---------|-------|------|--------|
-| 1.0.0 | 1 | December 24, 2025 | Uploaded to TestFlight |
+| Version | Build | Date | Status | Notes |
+|---------|-------|------|--------|-------|
+| 1.0.0 | 1 | December 24, 2025 | Uploaded to TestFlight | Initial build |
+| 1.0.0 | 2 | April 2026 | Uploaded to TestFlight | Dependency updates |
+| 1.0.0 | 3 | April 30, 2026 | Uploaded to TestFlight ✅ | Fix: answer options shuffled dynamically |
+
+---
+
+## 🔄 Release Workflow — Build 3 (April 30, 2026)
+
+This section documents the end-to-end steps taken to release build 3 to TestFlight.
+
+### 1. Code Changes
+
+**Bug fix:** On the Dashboard screen, category practice sessions were always presenting the correct answer as the first option (option A), because the questions were fetched via `getQuestionsByType()` which bypasses the shuffle pipeline.
+
+**Fix applied in** `lib/screens/dashboard_screen.dart`:
+- Added `import 'dart:math';`
+- Changed `List<Question>.from(questions)..shuffle()` to use a seeded `Random()` instance
+- Applied `withShuffledOptions(random)` to each selected question so option order is randomised on every session
+
+```dart
+// Before
+final shuffled = List<Question>.from(questions)..shuffle();
+final selectedQuestions = shuffled.take(10).toList();
+
+// After
+final random = Random();
+final shuffled = List<Question>.from(questions)..shuffle(random);
+final selectedQuestions = shuffled.take(10).map((q) => q.withShuffledOptions(random)).toList();
+```
+
+### 2. Git — Commit & Push
+
+```bash
+cd /Users/rajkumarnatarajan/Documents/raj/excel_citizen_flutter
+
+git add lib/screens/dashboard_screen.dart
+git commit -m "fix: shuffle answer options dynamically in category practice"
+git push origin main
+```
+
+### 3. Bump Build Number
+
+Updated `pubspec.yaml`:
+```yaml
+# Before
+version: 1.0.0+2
+
+# After
+version: 1.0.0+3
+```
+
+### 4. Build iOS Release Archive
+
+```bash
+flutter build ipa --release
+```
+
+Successful output:
+```
+✓ Built build/ios/archive/Runner.xcarchive (153.4MB)
+
+[✓] App Settings Validation
+    • Version Number: 1.0.0
+    • Build Number: 3
+    • Display Name: ExcelCitizen
+    • Deployment Target: 13.0
+    • Bundle Identifier: com.curiousdev.excelCitizenFlutter
+```
+
+> **Note:** `flutter build ipa --release` builds the `.xcarchive` but may fail at the IPA export step if automatic provisioning cannot resolve the certificate. Use `xcodebuild -exportArchive` directly in that case (step 5).
+
+### 5. Export IPA & Upload to App Store Connect
+
+```bash
+xcodebuild -exportArchive \
+  -archivePath /Users/rajkumarnatarajan/Documents/raj/excel_citizen_flutter/build/ios/archive/Runner.xcarchive \
+  -exportPath /Users/rajkumarnatarajan/Documents/raj/excel_citizen_flutter/build/ios/ipa \
+  -exportOptionsPlist /Users/rajkumarnatarajan/Documents/raj/excel_citizen_flutter/ios/ExportOptions.plist \
+  -allowProvisioningUpdates
+```
+
+The `-allowProvisioningUpdates` flag allows Xcode to automatically fetch and update provisioning profiles during export without needing manual Keychain interaction.
+
+Successful output:
+```
+Progress 83%: Upload succeeded.
+Uploaded Runner
+** EXPORT SUCCEEDED **
+```
+
+The IPA is exported to `build/ios/ipa/excel_citizen_flutter.ipa` and simultaneously uploaded directly to App Store Connect.
+
+### 6. Commit & Push Version Bump
+
+```bash
+git add pubspec.yaml
+git commit -m "chore: bump build number to 3 for TestFlight"
+git push origin main
+```
+
+### 7. Verify on App Store Connect
+
+1. Open [App Store Connect](https://appstoreconnect.apple.com)
+2. Navigate to **My Apps → ExcelCitizen → TestFlight**
+3. Build 3 appears under "iOS Builds" with status **"Processing"** initially, then **"Ready to Test"**
+4. Add/notify internal testers or submit for external Beta App Review
+
+### Quick Reference — Full Release Commands
+
+```bash
+cd /path/to/excel_citizen_flutter
+
+# 1. Make changes, commit and push
+git add <files>
+git commit -m "your message"
+git push origin main
+
+# 2. Bump build number in pubspec.yaml (version: x.y.z+N)
+
+# 3. Build the archive
+flutter build ipa --release
+
+# 4. Export & upload to App Store Connect
+xcodebuild -exportArchive \
+  -archivePath build/ios/archive/Runner.xcarchive \
+  -exportPath build/ios/ipa \
+  -exportOptionsPlist ios/ExportOptions.plist \
+  -allowProvisioningUpdates
+
+# 5. Commit the version bump
+git add pubspec.yaml
+git commit -m "chore: bump build number to N for TestFlight"
+git push origin main
+```
 
 ---
 
