@@ -6,7 +6,7 @@ class SettingsController with ChangeNotifier {
   factory SettingsController() => _instance;
   SettingsController._internal();
 
-  ThemeMode _themeMode = ThemeMode.system;
+  ThemeMode _themeMode = ThemeMode.dark;
   Language _language = Language.english;
   Difficulty _defaultDifficulty = Difficulty.medium;
   bool _notificationsEnabled = true;
