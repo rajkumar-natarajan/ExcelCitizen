@@ -137,6 +137,17 @@ Future updates may include:
 
 # Version History
 
+## v1.0.1 (Build 2) - April 30, 2026
+
+### 🐛 Bug Fixes
+- **Bookmark feature fixed**: The Practice screen now correctly reacts to bookmark changes made during a test session. The bookmark count and "Bookmarks" button now update immediately after returning from a quiz.
+- **Bookmark practice filter fixed**: Starting a "Bookmarks" practice session now searches all available questions (not just the random subset selected for the current config), so bookmarked questions are always found correctly.
+
+### 🧪 Tests
+- Added 8 new unit tests for the bookmark feature in `SmartLearningController` covering toggle add/remove, count increment/decrement, ID set membership, immutability of returned sets, and unknown-ID lookup.
+
+---
+
 ## v1.0.0 (Build 1)
 - Initial release
 

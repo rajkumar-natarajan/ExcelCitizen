@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../lib/controllers/smart_learning_controller.dart';
 import '../../lib/models/question.dart';
 
@@ -254,6 +255,90 @@ void main() {
       // For types that may not have data yet
       final avgTime = controller.getAverageTimeForType(QuestionType.economy);
       expect(avgTime, isA<double>());
+    });
+  });
+
+  group('SmartLearningController - Bookmark Tests', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('toggleBookmark adds a question to bookmarks', () {
+      final controller = SmartLearningController();
+      final questionId = 'bookmark_test_add_${DateTime.now().microsecondsSinceEpoch}';
+
+      expect(controller.isBookmarked(questionId), false);
+      controller.toggleBookmark(questionId);
+      expect(controller.isBookmarked(questionId), true);
+
+      // Clean up
+      controller.toggleBookmark(questionId);
+    });
+
+    test('toggleBookmark removes a bookmarked question', () {
+      final controller = SmartLearningController();
+      final questionId = 'bookmark_test_remove_${DateTime.now().microsecondsSinceEpoch}';
+
+      controller.toggleBookmark(questionId); // add
+      expect(controller.isBookmarked(questionId), true);
+
+      controller.toggleBookmark(questionId); // remove
+      expect(controller.isBookmarked(questionId), false);
+    });
+
+    test('bookmarkCount increments when a bookmark is added', () {
+      final controller = SmartLearningController();
+      final questionId = 'bookmark_test_count_${DateTime.now().microsecondsSinceEpoch}';
+      final countBefore = controller.bookmarkCount;
+
+      controller.toggleBookmark(questionId);
+      expect(controller.bookmarkCount, countBefore + 1);
+
+      // Clean up
+      controller.toggleBookmark(questionId);
+    });
+
+    test('bookmarkCount decrements when a bookmark is removed', () {
+      final controller = SmartLearningController();
+      final questionId = 'bookmark_test_decrement_${DateTime.now().microsecondsSinceEpoch}';
+
+      controller.toggleBookmark(questionId); // add
+      final countAfterAdd = controller.bookmarkCount;
+
+      controller.toggleBookmark(questionId); // remove
+      expect(controller.bookmarkCount, countAfterAdd - 1);
+    });
+
+    test('bookmarkedQuestionIds contains added question id', () {
+      final controller = SmartLearningController();
+      final questionId = 'bookmark_test_ids_${DateTime.now().microsecondsSinceEpoch}';
+
+      controller.toggleBookmark(questionId);
+      expect(controller.bookmarkedQuestionIds.contains(questionId), true);
+
+      // Clean up
+      controller.toggleBookmark(questionId);
+    });
+
+    test('bookmarkedQuestionIds does not contain removed question id', () {
+      final controller = SmartLearningController();
+      final questionId = 'bookmark_test_ids_remove_${DateTime.now().microsecondsSinceEpoch}';
+
+      controller.toggleBookmark(questionId); // add
+      controller.toggleBookmark(questionId); // remove
+      expect(controller.bookmarkedQuestionIds.contains(questionId), false);
+    });
+
+    test('bookmarkedQuestionIds returns a copy, not the internal set', () {
+      final controller = SmartLearningController();
+      final ids1 = controller.bookmarkedQuestionIds;
+      final ids2 = controller.bookmarkedQuestionIds;
+      expect(identical(ids1, ids2), false);
+    });
+
+    test('isBookmarked returns false for an id never toggled', () {
+      final controller = SmartLearningController();
+      expect(controller.isBookmarked('definitely_not_bookmarked_xyz_999'), false);
     });
   });
 }

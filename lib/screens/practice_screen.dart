@@ -36,7 +36,9 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AnimatedBuilder(
+      animation: _smartLearning,
+      builder: (context, _) => Scaffold(
       appBar: AppBar(
         title: const Text('Practice'),
       ),
@@ -75,6 +77,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -377,23 +380,32 @@ class _PracticeScreenState extends State<PracticeScreen> {
       selectedTypes: _selectedTypes.toList(),
     );
 
-    // Get base questions
-    var questions = QuestionDataManager().getConfiguredQuestions(
-      config,
-      _selectedLanguage,
-    );
-
-    // Filter for bookmarked questions if requested
+    // Filter for bookmarked questions if requested — use ALL questions so
+    // that bookmarks are never excluded by the random config subset.
+    List<Question> questions;
     if (bookmarksOnly) {
       final bookmarkIds = _smartLearning.bookmarkedQuestionIds;
-      questions = questions.where((q) => bookmarkIds.contains(q.id)).toList();
-      
-      if (questions.isEmpty) {
+      final allFiltered = QuestionDataManager().allQuestions.where((q) {
+        if (config.selectedTypes != null && config.selectedTypes!.isNotEmpty) {
+          if (!config.selectedTypes!.contains(q.type)) return false;
+        }
+        return bookmarkIds.contains(q.id);
+      }).toList();
+
+      if (allFiltered.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No bookmarked questions available')),
         );
         return;
       }
+      allFiltered.shuffle();
+      questions = allFiltered;
+    } else {
+      // Get base questions via normal config path
+      questions = QuestionDataManager().getConfiguredQuestions(
+        config,
+        _selectedLanguage,
+      );
     }
 
     // Take up to 15 questions for smart practice
